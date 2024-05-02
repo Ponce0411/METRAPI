@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metro Santiago</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <!-- Estilos Personalizados -->
+    <link href="{{ url_for('static', filename='styles.css') }}" rel="stylesheet">
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand">Metro Santiago</a>
+            <a class="titular"> Informate sobre los eventos del metro en tiempo real </a>
+        </div>
+    </nav>
+    <div class="container1">
+        <h1 class="titulo"> Bienvenido al sitio oficial del metro de Santiago </h1>
+        <p class="texto"> Aca podrás ver las estaciones del metro y sus rutas en todo momento, además de tener acceso a nuestro chat para compartir tus pensamientos </p>
+    </div>
+
+    <div class="container">
+        <div id="map-container">
+            <nav class="navbar-map">
+                <div class="container-fluid">
+                    <a class="navbar-map-name">METRAPI</a>
+                </div>
+            </nav>
+            
+            <div id="map"></div>
+
+            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+            <script>
+                var map = L.map('map').setView([-33.4372, -70.6506], 12);
+            
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+            
+                // Convertir la cadena JSON de estaciones_por_linea a un objeto JavaScript
+                var estaciones_por_linea = JSON.parse('{{ estaciones_por_linea|safe }}');
+            
+                // Dibujar las rutas para cada línea
+                for (var lineaId in estaciones_por_linea) {
+                    var estaciones_linea = estaciones_por_linea[lineaId]['stations'];
+                    var color = estaciones_por_linea[lineaId]['color'];
+                    var latlngs = [];
+            
+                    estaciones_linea.forEach(function(estacion) {
+                        latlngs.push([estacion.position.lat, estacion.position.long]);
+                    });
+            
+                    L.polyline(latlngs, { color: color }).addTo(map);
+                }
+            
+                // Define el tamaño del marcador predeterminado
+                L.Icon.Default.prototype.options.iconSize = [20, 30];
+            
+                // Agregar marcadores para cada estación
+                var estaciones_marcadores = JSON.parse('{{ estaciones_marcadores|safe }}');
+                estaciones_marcadores.forEach(function(estacion) {
+                    var marker = L.marker([estacion.position.lat, estacion.position.long]).addTo(map);
+                    var lineas = estacion.lines.join(' y ');
+            
+                    marker.bindPopup('<b>Estación:</b> ' + estacion.name + '<br><b>ID de Estación:</b> ' + estacion.station_id + '<br><b>Líneas:</b> ' + lineas);
+                });
+            
+                // Define el icono personalizado para los trenes
+                var trainIcon = L.icon({
+                    iconUrl: "{{ url_for('static', filename='images/metro.png') }}",
+                    iconSize: [45, 45], // Tamaño del icono
+                    iconAnchor: [20, 20], // Punto de anclaje del icono
+                });
+            
+                // Convertir la cadena JSON de trenes a un objeto JavaScript
+                var trenes = JSON.parse('{{ trenes|safe }}');
+            
+                // Variables para almacenar los marcadores de trenes
+                var trainMarkers = {};
+            
+                // Función para agregar o actualizar marcadores de trenes
+                function addOrUpdateTrainMarker(train) {
+                    // Buscar el tren específico por su ID en la lista de trenes
+                    var trainInfo = trenes.find(function(item) {
+                        return item.train_id === train.train_id;
+                    });
+            
+                    if (!trainInfo) {
+                        console.error('No se encontró información para el tren con ID:', train.train_id);
+                        return;
+                    }
+            
+                    // Buscar el marcador existente por train_id
+                    var existingMarker = trainMarkers[train.train_id];
+            
+                    if (existingMarker) {
+                        // Si existe, actualizar la posición
+                        existingMarker.setLatLng([train.lat, train.long]);
+                    } else {
+                        // Si no existe, crear un nuevo marcador
+                        var trainMarker = L.marker([train.lat, train.long], { icon: trainIcon });
+                        var popupContent1 = '<b>Tren:</b> ' + trainInfo.train_id + '<br>' +
+                            '<b>Línea:</b> ' + trainInfo.line_id + '<br>' +
+                            '<b>Conductor:</b> ' + trainInfo.driver_name + '<br>' +
+                            '<b>Origen:</b> ' + trainInfo.origin_station_id + '<br>' +
+                            '<b>Destino:</b> ' + trainInfo.destination_station_id;
+                        trainMarker.bindPopup(popupContent1, { autoClose: false }); // Evita que el mensaje se cierre automáticamente
+                        trainMarker.addTo(map);
+                        // Guardar el marcador en el objeto trainMarkers con train_id como clave
+                        trainMarkers[train.train_id] = trainMarker;
+                    }
+                }
+
+                // Define el icono personalizado para los trenes
+                var statusIcon = L.icon({
+                    iconUrl: "{{ url_for('static', filename='images/status.png') }}",
+                    iconSize: [1, 1], // Tamaño del icono
+                    iconAnchor: [1, 1], // Punto de anclaje del icono
+                });
+            
+                // Función para mostrar el estado de los trenes
+                function showTrainStatus(status) {
+                    // Obtener la posición del tren del objeto trainPositions
+                    var trainPosition = trainPositions.find(function(item) {
+                        return item.train_id === status.train_id;
+                    });
+
+                    if (!trainPosition) {
+                        console.error('No se encontró información de posición para el tren con ID:', status.train_id);
+                        return;
+                    }
+
+                    // Buscar la información específica del tren por su ID en la lista de trenes
+                    var trainInfo = trenes.find(function(item) {
+                        return item.train_id === status.train_id;
+                    });
+
+                    if (!trainInfo) {
+                        console.error('No se encontró información para el tren con ID:', status.train_id);
+                        return;
+                    }
+
+                    var popupContent = '<b>Tren:</b> ' + status.train_id + '<br>' +
+                                        '<b>Estado:</b> ' + status.status;
+                    var popup = L.popup().setLatLng([trainPosition.lat, trainPosition.long]).setContent(popupContent)
+                    map.openPopup(popup);
+
+                }
+            
+                // Función para obtener y actualizar la ubicación de los trenes y su estado
+                function updateTrainPositionsAndStatus() {
+                    // Realizar una solicitud AJAX para obtener la última posición de los trenes
+                    fetch('/train_positions')
+                        .then(response => response.json())
+                        .then(trainPositions => {
+                            // Limpiar todos los marcadores de trenes existentes
+                            Object.values(trainMarkers).forEach(marker => marker.remove());
+                            trainMarkers = {};
+            
+                            // Agregar o actualizar marcadores de trenes con la nueva información
+                            trainPositions.forEach(train => {
+                                addOrUpdateTrainMarker(train);
+                            });
+            
+                            // Guardar los datos de posición de los trenes para su uso en showTrainStatus
+                            window.trainPositions = trainPositions;
+                        })
+                        .catch(error => console.error('Error al obtener la posición de los trenes:', error));
+            
+                    // Realizar una solicitud AJAX para obtener el estado de los trenes
+                    fetch('/train_status')
+                        .then(response => response.json())
+                        .then(trainStatus => {
+
+                            // Mostrar el estado de los trenes
+                            trainStatus.forEach(status => {
+                                showTrainStatus(status);
+                            });
+                        })
+                        .catch(error => console.error('Error al obtener el estado de los trenes:', error));
+                }
+            
+                // Llamar a la función updateTrainPositionsAndStatus() cada 3 segundos
+                setInterval(updateTrainPositionsAndStatus, 3000);
+            </script>
+        </div>
+
+        <div>
+            <nav class="navbar-chat">
+                <div class="container-fluid">
+                    <a class="navbar-map-name">Chat</a>
+                </div>
+            </nav>
+
+            <div id="chat-panel" class="chat-panel">
+                <!-- Aquí se mostrarán los mensajes del chat -->
+            </div>
+
+            <form id="message-form" class="message-form">
+                <input type="text" id="message-input" class="message-input" placeholder="Escribe tu mensaje aquí" required>
+                <button type="submit" class="button-chat">Enviar</button>
+            </form>
+
+            <script>
+                var messages_chat = {}; // Objeto para almacenar los mensajes
+            
+                function updateChatPanel() {
+                    // Obtener los mensajes del servidor
+                    fetch('/messages')
+                        .then(response => response.json())
+                        .then(messages => {
+                            const chatPanel = document.getElementById('chat-panel');
+            
+                            messages.forEach(message => {
+                                // Crear una clave única para el mensaje
+                                const messageKey = message.content + '-' + message.name + '-' + message.time;
+            
+                                // Verificar si el mensaje ya existe en el chat
+                                if (!messages_chat.hasOwnProperty(messageKey)) {
+                                    // Si el mensaje no existe, agregarlo al chat y al objeto de mensajes
+                                    const messageContainer = document.createElement('div');
+                                    const messageElement = document.createElement('div');
+                                    const messageSender = document.createElement('div');
+                                    const messageTime = document.createElement('div');
+                                    const messageContent = document.createElement('div');
+            
+                                    messageContainer.classList.add('message-container');
+                                    messageElement.classList.add('message');
+                                    messageSender.classList.add('message-sender');
+                                    messageTime.classList.add('message-time');
+                                    messageContent.classList.add('message-content');
+            
+                                    messageSender.textContent = message.name;
+                                    messageTime.textContent = message.time;
+                                    messageContent.textContent = message.content;
+            
+                                    // Verificar si el train_id es igual a "User"
+                                    if (message.train_id === "User") {
+                                        messageContainer.classList.add('message-container-client');
+                                    }
+            
+                                    messageElement.appendChild(messageSender);
+                                    messageElement.appendChild(messageTime);
+                                    messageElement.appendChild(document.createElement('br'));
+                                    messageElement.appendChild(messageContent);
+            
+                                    messageContainer.appendChild(messageElement);
+                                    chatPanel.appendChild(messageContainer);
+            
+                                    // Guardar el mensaje en el objeto de mensajes
+                                    messages_chat[messageKey] = true;
+                                }
+                            });
+                        })
+                        .catch(error => console.error('Error al obtener los mensajes del chat:', error));
+                }
+            
+                // Llamar a la función updateChatPanel() cada 1 segundos
+                setInterval(updateChatPanel, 2000);
+            </script>
+
+            <script>
+
+                // Verificar si ya hay un nombre de usuario en el almacenamiento local
+                let userName = localStorage.getItem('chatUserName');
+
+                // Si no hay un nombre de usuario almacenado, generar uno nuevo y guardarlo en el almacenamiento local
+                if (!userName) {
+                    userName = 'User' + Math.floor(Math.random() * 1000);
+                    localStorage.setItem('chatUserName', userName);
+                }
+                // Manejar el envío de mensajes del cliente
+                document.getElementById('message-form').addEventListener('submit', function(event) {
+                    event.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
+
+                    // Obtener el contenido del mensaje desde el input
+                    var messageContent = document.getElementById('message-input').value;
+
+                    // Registra la fecha y la hora
+                    var timestamp = new Date().toLocaleString().replace(',', '');
+
+                    // Enviar el mensaje al backend
+                    fetch('/send_message', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ 
+                            content: messageContent,
+                            name: userName, // Utilizar el nombre de usuario almacenado
+                            time: timestamp
+                        }) // Convertir el contenido del mensaje a JSON
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Limpiar el input después de enviar el mensaje
+                            document.getElementById('message-input').value = '';
+                        } else {
+                            console.error('Error al enviar el mensaje');
+                        }
+                    })
+                    .catch(error => console.error('Error al enviar el mensaje:', error));
+                });
+            </script>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="estaciones">
+            <nav class="navbar-estaciones">
+                <div class="container-fluid">
+                    <a class="navbar-map-name">Estaciones</a>
+                </div>
+            </nav>
+            <div class="tabla-scrollable">
+                <table class="tabla-estaciones">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>ID</th>
+                            <th>Línea</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for estacion in estaciones %}
+                            <tr>
+                                <td>{{ estacion[0] }}</td>
+                                <td>{{ estacion[1] }}</td>
+                                <td>{{ estacion[2] }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="trenes">
+            <nav class="navbar-trenes">
+                <div class="container-fluid">
+                    <a class="navbar-map-name">Trenes</a>
+                </div>
+            </nav>
+            <div class="tabla-scrollable-trenes">
+                <table class="tabla-trenes">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Chofer</th>
+                            <th>Origen</th>
+                            <th>Destino</th>
+                            <th>Estación Actual</th> <!-- Nueva columna -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tren in trains %}
+                            <tr data-train-id="{{ tren[0] }}"> <!-- Agregado el atributo data-train-id -->
+                                <td>{{ tren[0] }}</td>
+                                <td>{{ tren[1] }}</td>
+                                <td>{{ tren[2] }}</td>
+                                <td>{{ tren[3] }}</td>
+                                <td class="current-station"></td> <!-- Cambiado el orden -->
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script>
+            // Función para obtener y actualizar la estación actual de los trenes
+            function updateTrainCurrentStation() {
+                // Realizar una solicitud AJAX para obtener la última estación actual de los trenes
+                fetch('/train_arrival')
+                    .then(response => response.json())
+                    .then(trainArrival => {
+                        // Actualizar la información de la estación actual en la tabla de trenes
+                        trainArrival.forEach(arrival => {
+                            var trainId = arrival.train_id;
+                            var currentStation = arrival.station_id;
+
+                            // Buscar la fila correspondiente al tren en la tabla de trenes y actualizar la estación actual
+                            var trainRow = document.querySelector('tr[data-train-id="' + trainId + '"]');
+                            if (trainRow) {
+                                var currentStationCell = trainRow.querySelector('.current-station');
+                                if (currentStationCell) {
+                                    currentStationCell.textContent = currentStation;
+                                }
+                            }
+                        });
+                    })
+                    .catch(error => console.error('Error al obtener la estación actual de los trenes:', error));
+            }
+
+            // Llamar a la función updateTrainCurrentStation() cada 3 segundos
+            setInterval(updateTrainCurrentStation, 3000);
+        </script>
+    </div>
+
+    <br>
+    <br>
+</body>
+</html>

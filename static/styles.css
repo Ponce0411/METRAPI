@@ -1,0 +1,275 @@
+.navbar {
+    background-color: #cf0808; /* Color rojo intenso */
+    color: white; /* Texto blanco */
+    padding: 10px 0;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 30px;
+    font-weight: bold;
+    margin-left: 120px;
+    margin-right: 30px;
+    text-decoration: none;
+    color: white;
+    transition: color 0.3s; /* Añadimos transición para el cambio de color */
+}
+.titular {
+    font-size: 24px;
+    margin-left: 15px;
+    color: white;
+}
+
+.navbar-brand:hover,
+.titular:hover {
+    color: black; /* Cambiamos el color a negro al pasar el ratón */
+}
+
+body {
+    background-color: rgb(252, 252, 194);
+}
+
+.container1 {
+    margin: 50px;
+    justify-content: space-between;
+    align-items: center;
+    width: 1200px;
+    margin-left: 140px;    
+}
+
+.titulo {
+    text-align: center;    
+}
+
+.texto {
+    text-align: center;
+    font-size: 20px
+}
+
+#map {
+    height: 600px;
+    width: 800px;
+    margin-left: 120px; /* Aplica un margen izquierdo al mapa */
+}
+
+.navbar-map {
+    background-color: #cf0808; /* Color rojo intenso */
+    color: white; /* Texto blanco */
+    position: absolute;
+    padding: 10px 0;
+    width: 800px;
+    z-index: 1000; /* Asegura que la barra esté por encima del mapa */
+    margin-left: 120px; /* Alinea la barra con el margen del mapa */
+    display: flex;
+    justify-content: center; /* Centra horizontalmente los elementos */
+    align-items: center; /* Centra verticalmente los elementos */
+}
+
+.map-container {
+    width: 800px;
+    height: 600px; /* O ajusta la altura según sea necesario */
+    position: relative;
+}
+
+.navbar-map-name {
+    margin: 0;
+    font-weight: bold;
+}
+
+.container {
+    display: flex; /* Utiliza flexbox para el diseño */
+    justify-content: space-between; /* Distribuye los elementos a lo largo del contenedor */
+    width: 1200px; /* Haz que el contenedor ocupe todo el ancho disponible */
+    margin-top: 10px;
+}
+
+.estaciones {
+    margin-top: 2px;
+    width: 400px; /* Haz que el contenedor de estaciones ocupe todo el ancho disponible */
+    margin-left: 120px;
+    display: flex; /* Utiliza flexbox para el diseño */
+    flex-direction: column; /* Alinear los elementos en una columna */
+    align-items: center; /* Centrar los elementos horizontalmente */
+}
+
+.navbar-estaciones {
+    background-color: #cf0808; /* Color rojo intenso */
+    color: white; /* Texto blanco */
+    width: 400px; /* Haz que la barra de navegación ocupe todo el ancho disponible */
+    padding: 10px 0;
+    text-align: center; /* Centrar el texto horizontalmente */
+}
+
+.tabla-scrollable {
+    max-height: 500px; /* Altura máxima de la tabla */
+    overflow-y: auto; /* Habilita el scroll vertical si el contenido excede la altura máxima */
+    background-color: white;
+}
+
+.tabla-estaciones {
+    width: 384px;
+    border-collapse: collapse; /* Combina los bordes de las celdas */
+}
+
+.tabla-estaciones th, .tabla-estaciones td {
+    border: 1px solid #ddd; /* Añade bordes a las celdas */
+    padding: 8px; /* Espaciado interno de las celdas */
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+
+.tabla-estaciones th {
+    background-color: #f2f2f2; /* Color de fondo para las celdas de encabezado */
+}
+
+.trenes {
+    margin-top: 2px;
+    width: 800px; /* Haz que el contenedor de estaciones ocupe todo el ancho disponible */
+    margin-left: 30px;
+    display: flex; /* Utiliza flexbox para el diseño */
+    flex-direction: column; /* Alinear los elementos en una columna */
+    align-items: center; /* Centrar los elementos horizontalmente */
+}
+
+.navbar-trenes {
+    background-color: #cf0808; /* Color rojo intenso */
+    color: white; /* Texto blanco */
+    width: 850px; /* Haz que la barra de navegación ocupe todo el ancho disponible */
+    padding: 10px 0;
+    text-align: center; /* Centrar el texto horizontalmente */
+}
+
+.tabla-scrollable-trenes {
+    max-height: 500px; /* Altura máxima de la tabla */
+    overflow-y: auto; /* Habilita el scroll vertical si el contenido excede la altura máxima */
+    background-color: white;
+}
+
+.tabla-trenes {
+    width: 834px;
+    border-collapse: collapse; /* Combina los bordes de las celdas */
+}
+
+.tabla-trenes th, .tabla-trenes td {
+    border: 1px solid #ddd; /* Añade bordes a las celdas */
+    padding: 8px; /* Espaciado interno de las celdas */
+    text-align: left; /* Alinea el texto a la izquierda */
+}
+
+.tabla-trenes th {
+    background-color: #f2f2f2; /* Color de fondo para las celdas de encabezado */
+}
+
+
+
+.chat-panel {
+    background: linear-gradient(to bottom, #c1f45d, #96e40f); /* Verde claro a más oscuro */
+    width: 431px;
+    height: 500px; /* Altura del panel del chat */
+    margin-left: 5px;
+    overflow-y: auto; /* Habilitar el scroll vertical */
+    border: 1px solid #ccc; /* Borde del panel del chat */
+    padding: 10px; /* Espacio interno del panel del chat */
+    animation: scrollAnimation 1s ease;
+}
+
+.message {
+    margin-bottom: 10px; /* Espacio entre mensajes */
+}
+
+.message-content {
+    margin-bottom: 5px; /* Espacio entre el contenido del mensaje y el nombre del remitente */
+}
+
+.message-sender {
+    font-weight: bold; /* Texto del remitente en negrita */
+}
+
+.navbar-chat {
+    background-color: #cf0808; /* Color rojo intenso */
+    color: white; /* Texto blanco */
+    width: 452px; /* Haz que la barra de navegación ocupe todo el ancho disponible */
+    padding: 10px 0;
+    text-align: center; /* Centrar el texto horizontalmente */
+    margin-left: 5px; 
+}
+
+@keyframes scrollAnimation {
+    from {
+        scrollTop: 0;
+    }
+    to {
+        scrollTop: 10000px; /* Esto hará que el panel de chat se desplace hasta la parte inferior */
+    }
+}
+
+.message-container {
+    background-color: rgba(255, 255, 255, 0.992); /* Color de fondo para todos los mensajes */
+    margin: 15px 0; /* Margen superior e inferior */
+    border-radius: 20px; /* Redondear las esquinas */
+    padding: 10px; /* Añadir un poco de espacio interno */
+    margin-right: 100px;
+}
+
+.message-container-client {
+    background: linear-gradient(to bottom, #87CEEB, #4682B4);  
+    margin: 15px 0; /* Margen superior e inferior */
+    border-radius: 20px; /* Redondear las esquinas */
+    padding: 10px; /* Añadir un poco de espacio interno */
+    margin-left: 100px;  
+}
+
+.message-form {
+    display: flex;
+    align-items: center;
+    width: 456px;
+}
+
+.message-input {
+    flex: 1; /* El campo de entrada ocupará todo el espacio disponible */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+.message-input:focus {
+    outline: none;
+    border-color: #000000;
+}
+
+.message-submit {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 10px; /* Agregar un margen entre el campo de entrada y el botón */
+}
+
+.message-submit:hover {
+    background-color: #0056b3;
+}
+
+.button-chat {
+    background: linear-gradient(to bottom, #56c1eb, #1e78c1); 
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: max-content;
+    color: white; /* Color del texto blanco */
+    font-weight: bold;
+}
+
+.button-chat:focus {
+    outline: none;
+    border-color: #000000;
+}
+
